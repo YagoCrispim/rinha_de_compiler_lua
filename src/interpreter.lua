@@ -1,27 +1,3 @@
-local json = require 'lib.json'
-local io = require 'io'
-
---[[
-  TODO: Write fn docs
-]]
-
-local function readFile(path)
-    local file = io.open(path, 'r')
-    if file == nil then
-      return nil
-    end
-    local content = file:read('*a')
-    file:close()
-    return content
-end
-
-local astPaths = {
-  print = 'asts/print.json',
-  combination = 'asts/combination.json',
-  fib = 'asts/fib.json',
-  sum = 'asts/sum.json'
-}
-
 local interpreter = {
   symbolTable = {
     -- For now only global scope
@@ -36,28 +12,31 @@ local interpreter = {
     end,
     ["Add"] = function (valA, valB)
       return valA + valB
+    end,
+    ["Lt"] = function (valA, valB)
+      return valA < valB
     end
   },
 
   interpret = function (self, ast)
     for _, v in pairs(ast) do
         if v.kind then
-          self:visit(v)
+          self:_visit(v)
         end
         
         if v.next then
-          self:visit(v.next)
+          self:_visit(v.next)
         end
       end
   end,
 
-  visit = function (self, node)
+  _visit = function (self, node)
     local kind = node.kind
-    local visitor = self['visit' .. kind]
+    local visitor = self['_visit' .. kind]
     return visitor(self, node)
   end,
 
-  visitPrint = function (self, node)
+  _visitPrint = function (self, node)
     local kind = node.value.kind
     if kind == 'Str' or kind == 'Int' then
       local value = node.value.value
@@ -65,26 +44,31 @@ local interpreter = {
     end
 
     if kind == 'Call' then
-      local value = self:visit(node.value)
+      local value = self:_visit(node.value)
       print(value)
     end
   end,
 
   -- Variable declaration
-  visitLet = function (self, node)
+  _visitLet = function (self, node)
     local name = node.name.text
-    local value = self:visit(node.value)
-    table.insert(self.symbolTable.variables, { name = name, value = value })
+    local value = self:_visit(node.value)
+    local varInTable = self:_lookup(name)
+    if not varInTable then
+      table.insert(self.symbolTable.variables, { name = name, value = value })
+    else
+      varInTable.value = value
+    end
   end,
 
   -- Function declaration
-  visitFunction = function (self, node)
+  _visitFunction = function (self, node)
     return node
   end,
 
   -- Function call
-  visitCall = function (self, node)
-    local fnNode = self:visit(node.callee)
+  _visitCall = function (self, node)
+    local fnNode = self:_visit(node.callee)
     local fnRef = fnNode.value
     if not fnRef then
       error('Function not found')
@@ -98,7 +82,7 @@ local interpreter = {
     end
     
     for _, v in pairs(node.arguments) do
-      local arg = self:visit(v)
+      local arg = self:_visit(v)
       table.insert(fnArgs, arg)
     end
     
@@ -109,46 +93,64 @@ local interpreter = {
     for i = 1, #fnParams do
       local varName = fnParams[i]
       local varValue = fnArgs[i]
-      table.insert(self.symbolTable.variables, { name = varName, value = varValue })
+
+      local varInTable = self:_lookup(varName)
+      if not varInTable then
+        table.insert(self.symbolTable.variables, { name = varName, value = varValue })
+      else
+        varInTable.value = varValue
+      end
     end
 
-    return self:visit(fnRef.value)
+    return self:_visit(fnRef.value)
   end,
 
-  visitIf = function (self, node)
-    local condition = self:visit(node.condition)
+  _visitIf = function (self, node)
+    local condition = self:_visit(node.condition)
     
     if condition then
       local thenNode = node['then']
-      local result = self:visit(thenNode)
+      local result = self:_visit(thenNode)
       return result.value
     else
-      local result = self:visit(node.otherwise)
+      local result = self:_visit(node.otherwise)
       return result
     end
   end,
 
-  visitBinary = function (self, node)
-    local left = self:visit(node.lhs)
-    local right = self:visit(node.rhs)
+  _visitBinary = function (self, node)
+    local left = self:_visit(node.lhs)
     local operator = node.op
-    
+    local right = self:_visit(node.rhs)
+
     local operation = self.operations[operator]
     if not operation then
       error('Invalid operation. ' .. 'Operator ' .. '"' .. operator .. '"' .. ' not found')
     end
 
-    local result = operation(left.value, right)
+    -- gamb
+    local leftValue = nil
+    if type(left) == "table" and left.value ~= nil then
+      leftValue = left.value
+    else
+      leftValue = left
+    end
+    local result = operation(leftValue, right)
 
     if operator == 'Eq' then
       return result
     end
 
-    table.insert(self.symbolTable.variables, { name = left.name, value = result })
+    local varInTable = self:_lookup(left.name)
+    if not varInTable then
+      table.insert(self.symbolTable.variables, { name = left.name, value = result })
+    else
+      varInTable.value = left.value
+    end
     return result
   end,
 
-  visitVar = function (self, node)
+  _visitVar = function (self, node)
     local name = node.text
     local value = nil
     for _, v in pairs(self.symbolTable.variables) do
@@ -159,16 +161,21 @@ local interpreter = {
     return { name = name, value = value }
   end,
 
-  visitInt = function (self, node)
+  _visitInt = function (self, node)
     local value = node.value
     return value
   end,
+
+  -- helpers
+  _lookup = function (self, name)
+    local result = nil
+    for _, v in pairs(self.symbolTable.variables) do
+      if v.name == name then
+        result = v
+      end
+    end
+    return result
+  end
 }
 
-print('Interpreting "print - Hello world" AST')
-local printAst = readFile(astPaths.print)
-interpreter:interpret(json.decode(printAst))
-
-print('\nInterpreting "sum" AST')
-local sumAst = readFile(astPaths.sum)
-interpreter:interpret(json.decode(sumAst))
+return interpreter
