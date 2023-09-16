@@ -1,11 +1,6 @@
 #!/bin/bash
 
-lua src/interpreter.lua
-
-#!/bin/bash
-
-# first argument
-FILE="src/interpreter.lua"
+FILE="src/main.lua"
 eval $(luarocks path)
 
 function clear_screen() {

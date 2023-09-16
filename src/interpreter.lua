@@ -1,33 +1,27 @@
-local json = require 'lib.json'
-local io = require 'io'
-
---[[
-  TODO: Write fn docs
-]]
-
-local function readFile(path)
-    local file = io.open(path, 'r')
-    if file == nil then
-      return nil
-    end
-    local content = file:read('*a')
-    file:close()
-    return content
+local d = require "lib.tabledump"
+local log = function (...)
+  local currentLine = debug.getinfo(2).currentline
+  print(currentLine, ...)
 end
 
-local astPaths = {
-  print = 'asts/print.json',
-  combination = 'asts/combination.json',
-  fib = 'asts/fib.json',
-  sum = 'asts/sum.json'
-}
-
 local interpreter = {
-  symbolTable = {
-    -- For now only global scope
+  _logVisitorName = false,
+  --[[
+    Description: Represents the symbol table.
+
+    @wip: scopes
+    @return: any
+  ]]
+  _symbolTable = {
     variables = {},
   },
-  operations = {
+
+  --[[
+    Description: Represents the operations supported by the interpreter.
+    
+    @return: any
+  ]]
+  _operations = {
     ["Eq"] = function (valA, valB)
       return valA == valB
     end,
@@ -36,28 +30,45 @@ local interpreter = {
     end,
     ["Add"] = function (valA, valB)
       return valA + valB
+    end,
+    ["Lt"] = function (valA, valB)
+      return valA < valB
     end
   },
 
+  --[[
+    Description: Interprets the AST.
+    
+    @param ast: AST
+    @return: nil
+  ]]
   interpret = function (self, ast)
     for _, v in pairs(ast) do
         if v.kind then
-          self:visit(v)
+          self:_visit(v)
         end
         
         if v.next then
-          self:visit(v.next)
+          self:_visit(v.next)
         end
       end
   end,
 
-  visit = function (self, node)
+  _visit = function (self, node)
+    if self._logVisitorName then
+      log('Visiting: ' .. '_visit' .. node.kind)
+    end
+
     local kind = node.kind
-    local visitor = self['visit' .. kind]
+    local visitor = self['_visit' .. kind]
     return visitor(self, node)
   end,
 
-  visitPrint = function (self, node)
+  --[[
+      Description: Prints any values
+      Returns: nil
+  ]]
+  _visitPrint = function (self, node)
     local kind = node.value.kind
     if kind == 'Str' or kind == 'Int' then
       local value = node.value.value
@@ -65,110 +76,215 @@ local interpreter = {
     end
 
     if kind == 'Call' then
-      local value = self:visit(node.value)
+      local value = self:_visit(node.value)
       print(value)
     end
   end,
 
-  -- Variable declaration
-  visitLet = function (self, node)
+  --[[
+      Insert the given variable into the symbol table -|-
+      If the variable already exists, update its value (while there is no scope support yet)
+
+      @param node: AST node kind "Let"
+      @return: nil
+      @return type: nil
+  ]]
+  _visitLet = function (self, node)
     local name = node.name.text
-    local value = self:visit(node.value)
-    table.insert(self.symbolTable.variables, { name = name, value = value })
+    local value = self:_visit(node.value)
+    self:_insert(name, value)
   end,
 
-  -- Function declaration
-  visitFunction = function (self, node)
+  --[[
+    Description: Represents the function declaration.
+
+    @param node: AST node kind "Function"
+    @return: AST node kind "Function"
+    @return type: table
+
+    @example:
+      {
+        value: table with all the function node
+      }
+  ]]
+  _visitFunction = function (self, node)
     return node
   end,
 
-  -- Function call
-  visitCall = function (self, node)
-    local fnNode = self:visit(node.callee)
-    local fnRef = fnNode.value
-    if not fnRef then
-      error('Function not found')
+  --[[
+    Description: Represents the function call
+    @return: AST node kind "Call"
+    @return type: table
+    WIP
+  ]]
+  _visitCall = function (self, node)
+    local fnNode = self:_visit(node.callee)
+    local fnBody = fnNode.value.value
+
+    if not fnNode then
+      self._err('Function not defined')
     end
 
-    local fnParams = {}
+    if #fnNode.value.parameters ~= #node.arguments then
+      self._err('Invalid number of arguments')
+    end
+
     local fnArgs = {}
-
-    for _, v in pairs(fnRef.parameters) do
-      table.insert(fnParams, v.text)
-    end
-    
-    for _, v in pairs(node.arguments) do
-      local arg = self:visit(v)
-      table.insert(fnArgs, arg)
-    end
-    
-    if #fnParams ~= #fnArgs then
-      error('Invalid number of arguments')
+    for i, v in pairs(fnNode.value.parameters) do
+      local param = v.text
+      local argument = self:_visit(node.arguments[i])
+      table.insert(fnArgs, { name = param, value = argument.value })
     end
 
-    for i = 1, #fnParams do
-      local varName = fnParams[i]
-      local varValue = fnArgs[i]
-      table.insert(self.symbolTable.variables, { name = varName, value = varValue })
+    for _, argument in pairs(fnArgs) do
+      local name = argument.name
+      local value = argument.value
+      self:_insert(name, value)
     end
-
-    return self:visit(fnRef.value)
+    return self:_visit(fnBody)
   end,
 
-  visitIf = function (self, node)
-    local condition = self:visit(node.condition)
+  --[[
+    Description: Represents a boolean expression
     
-    if condition then
+    @param node: AST node kind "If" containing the block of code to be executed if the condition is true.
+    The otherwise block is optional.
+
+    @return:
+    {
+      value: any | nil
+    }
+  ]]
+  _visitIf = function (self, node)
+    local condition = self:_visit(node.condition)
+    local result = nil
+
+    if condition.value then
       local thenNode = node['then']
-      local result = self:visit(thenNode)
-      return result.value
+      local conditionResult = self:_visit(thenNode)
+      result = conditionResult.value
     else
-      local result = self:visit(node.otherwise)
-      return result
+      if node.otherwise then
+        local conditionResult = self:_visit(node.otherwise)
+        result = conditionResult.value
+      end
     end
-  end,
-
-  visitBinary = function (self, node)
-    local left = self:visit(node.lhs)
-    local right = self:visit(node.rhs)
-    local operator = node.op
-    
-    local operation = self.operations[operator]
-    if not operation then
-      error('Invalid operation. ' .. 'Operator ' .. '"' .. operator .. '"' .. ' not found')
-    end
-
-    local result = operation(left.value, right)
-
-    if operator == 'Eq' then
-      return result
-    end
-
-    table.insert(self.symbolTable.variables, { name = left.name, value = result })
     return result
   end,
 
-  visitVar = function (self, node)
-    local name = node.text
-    local value = nil
-    for _, v in pairs(self.symbolTable.variables) do
-      if v.name == name then
-        value = v.value
+  _visitBinary = function (self, node)
+    local left = self:_visit(node.lhs)
+    local operator = node.op
+    local right = self:_visit(node.rhs)
+
+    local operation = self._operations[operator]
+    if not operation then
+      self._err('Invalid operation. ' .. 'Operator ' .. '"' .. operator .. '"' .. ' not found')
+    end
+
+    local standardizeValue = function (val)
+      if type(val) == "table" and val.value ~= nil then
+        return val.value
+      else
+        return val
       end
     end
-    return { name = name, value = value }
+
+    -- gamb
+    local leftValue = standardizeValue(left)
+    local rightValue = standardizeValue(right)
+    local result = operation(leftValue, rightValue)
+
+    if operator == 'Eq' or operator == 'Lt' then
+      return { value = result }
+    end
+
+    self:_insert(left.name, result)
+    return { value = result }
   end,
 
-  visitInt = function (self, node)
-    local value = node.value
-    return value
+  --[[
+    Description: Represents the variable reference.
+    
+    @return value
+      {
+        name: string,
+        value: any | nil
+      }
+  ]]
+  _visitVar = function (self, node)
+    local name = node.text
+    local result = nil
+
+    for _, v in pairs(self._symbolTable.variables) do
+      if v.name == name then
+        result = v
+      end
+    end
+    return result
   end,
+
+  --[[
+    Description: Represents the string literal.
+    
+    @return value
+      {
+        value: string
+      }
+  ]]
+  _visitInt = function (self, node)
+    return {
+      value = node.value
+    }
+  end,
+
+  -- #####################################################
+  -- #                                                   #
+  -- #                     Helpers                       #
+  -- #                                                   #
+  -- #####################################################
+
+  --[[
+    Description: Lookup for a variable in the symbol table.
+    
+    @param name: string
+    @return:
+      {
+        value: any | nil
+      }
+  ]]
+  _lookup = function (self, name)
+    local result = nil
+    for _, v in pairs(self._symbolTable.variables) do
+      if v.name == name then
+        result = v
+      end
+    end
+    return result
+  end,
+
+  --[[
+    Description: Insert a variable into the symbol table.
+    
+    @param name: string
+    @param value: any
+    @return: nil
+  ]]
+  _insert = function (self, name, value)
+      table.insert(self._symbolTable.variables, { name = name, value = value })
+  end,
+
+  --[[
+    Description: Prints an error message.
+    
+    @param message: string
+    @return: nil
+  ]]
+  _err = function (...)
+    log('\n')
+    log('[ERROR]: ' .. ...)
+    log('\n')
+  end
 }
 
-print('Interpreting "print - Hello world" AST')
-local printAst = readFile(astPaths.print)
-interpreter:interpret(json.decode(printAst))
-
-print('\nInterpreting "sum" AST')
-local sumAst = readFile(astPaths.sum)
-interpreter:interpret(json.decode(sumAst))
+return interpreter
