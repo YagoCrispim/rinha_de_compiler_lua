@@ -6,18 +6,21 @@ local interpreter = class({
     self._symtab = SymbolTable:new()
     self._allowLog = false
     self._operations = {
-      ["Eq"] = function (valA, valB)
+      Eq = function (valA, valB)
         return valA == valB
       end,
-      ["Sub"] = function (valA, valB)
+      Sub = function (valA, valB)
         return valA - valB
       end,
-      ["Add"] = function (valA, valB)
+      Add = function (valA, valB)
         return valA + valB
       end,
-      ["Lt"] = function (valA, valB)
+      Lt = function (valA, valB)
         return valA < valB
-      end
+      end,
+      Or = function (valA, valB)
+        return valA or valB
+      end,
     }
   end,
   methods = {
@@ -92,9 +95,20 @@ local interpreter = class({
     end,
 
     Binary = function (self, ast)
-      local op = self._operations[ast.op]
+      local opName = ast.op
+      local op = self._operations[opName]
       local valA = self:interpret(ast.lhs)
       local valB = self:interpret(ast.rhs)
+
+      if type(valA) == 'table' then
+        valA = self:interpret(valA)
+      end
+
+      if type(valB) == 'table' then
+        valB = self:interpret(valB)
+      end
+
+      print(valA, opName, valB)
       local result = op(valA, valB)
       return result
     end,
