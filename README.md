@@ -1,2 +1,3 @@
 # lua-rinha-interpreter
-AST interpreter for Rinha de compilers
+
+An interpreter for ".rinha" files. Made for "Rinha de Compiladores" using Lua
