@@ -19,14 +19,13 @@ local astPaths = {
   sum = 'asts/sum.json'
 }
 
-print('Interpreting "print - Hello world" AST')
-local printAst = readFile(astPaths.print)
-interpreter:interpret(json.decode(printAst))
-
-print('\nInterpreting "sum" AST')
-local sumAst = readFile(astPaths.sum)
-interpreter:interpret(json.decode(sumAst))
-
--- print('\nInterpreting "fib" AST')
--- local sumAst = readFile(astPaths.fib)
--- interpreter:interpret(json.decode(sumAst))
+for k, v in pairs({
+  -- print = astPaths.print,
+  -- sumAst = astPaths.sum,
+  fibAst = astPaths.fib -- expected: 55 || 13
+}) do
+  print('Interpreting "' .. k .. '" AST')
+  local ast = readFile(v)
+  interpreter:new():interpret(json.decode(ast), {})
+  print('------------------')
+end
