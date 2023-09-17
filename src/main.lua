@@ -2,6 +2,9 @@ local json = require 'lib.json'
 local io = require 'io'
 local interpreter = require "src.interpreter"
 
+-- global
+D = require "lib.tabledump"
+
 local function readFile(path)
   local file = io.open(path, 'r')
   if file == nil then
@@ -12,21 +15,14 @@ local function readFile(path)
   return content
 end
 
-local astPaths = {
+for k, v in pairs({
   print = 'asts/print.json',
-  combination = 'asts/combination.json',
   fib = 'asts/fib.json',
-  sum = 'asts/sum.json'
-}
-
-print('Interpreting "print - Hello world" AST')
-local printAst = readFile(astPaths.print)
-interpreter:interpret(json.decode(printAst))
-
-print('\nInterpreting "sum" AST')
-local sumAst = readFile(astPaths.sum)
-interpreter:interpret(json.decode(sumAst))
-
--- print('\nInterpreting "fib" AST')
--- local sumAst = readFile(astPaths.fib)
--- interpreter:interpret(json.decode(sumAst))
+  sum = 'asts/sum.json',
+  -- combination = 'asts/combination.json',
+}) do
+  print('Interpreting "' .. k .. '" AST')
+  local ast = readFile(v)
+  interpreter:new():interpret(json.decode(ast), {})
+  print('------------------')
+end
