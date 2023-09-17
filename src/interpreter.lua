@@ -1,12 +1,10 @@
-local class = require "src.class"
-local d = require "lib.tabledump"
+local class = require "lib.class"
+local SymbolTable = require "src.symtab"
 
--- local log = true
-local log = false
 local interpreter = class({
   constructor = function (self)
-    self._symtab = {}
-    self._log = log
+    self._symtab = SymbolTable:new()
+    self._allowLog = false
     self._operations = {
       ["Eq"] = function (valA, valB)
         return valA == valB
@@ -27,7 +25,7 @@ local interpreter = class({
       if ast.expression then
         return self:interpret(ast.expression)
       end
-      self:log('Calling', ast.kind)
+      self:_log('Calling', ast.kind)
       return self[ast.kind](self, ast)
     end,
 
@@ -41,7 +39,7 @@ local interpreter = class({
     end,
 
     Let = function (self, ast)
-      self._symtab[ast.name.text] = ast.value
+      self._symtab:define(ast.name.text, ast.value)
       self:interpret(ast.next)
     end,
 
@@ -51,17 +49,18 @@ local interpreter = class({
       local fnParams = fn.parameters
       local fnBody = fn.value
 
+      self._symtab:pushScope()
       for i, v in ipairs(fnParams) do
         local arg = self:interpret(calleeArgs[i])
-        self._symtab[v.text] = arg
+        self._symtab:define(v.text, arg)
       end
-
       local result = self:interpret(fnBody)
+      self._symtab:popScope()
       return result
     end,
 
     Var = function (self, ast)
-      local res = self._symtab[ast.text]
+      local res = self._symtab:lookup(ast.text)
       return res
     end,
 
@@ -86,8 +85,8 @@ local interpreter = class({
       return result
     end,
 
-    log = function (self, ...)
-      if self._log then
+    _log = function (self, ...)
+      if self._allowLog then
         local currentLine = debug.getinfo(2).currentline
         print('[Line: ' .. currentLine .. ']' .. ' >>> ',  ...)
       end

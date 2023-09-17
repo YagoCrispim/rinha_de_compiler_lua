@@ -2,6 +2,9 @@ local json = require 'lib.json'
 local io = require 'io'
 local interpreter = require "src.interpreter"
 
+-- global
+D = require "lib.tabledump"
+
 local function readFile(path)
   local file = io.open(path, 'r')
   if file == nil then
@@ -20,8 +23,8 @@ local astPaths = {
 }
 
 for k, v in pairs({
-  -- print = astPaths.print,
-  -- sumAst = astPaths.sum,
+  print = astPaths.print,
+  sumAst = astPaths.sum,
   fibAst = astPaths.fib -- expected: 55 || 13
 }) do
   print('Interpreting "' .. k .. '" AST')
