@@ -15,17 +15,11 @@ local function readFile(path)
   return content
 end
 
-local astPaths = {
-  print = 'asts/print.json',
-  combination = 'asts/combination.json',
-  fib = 'asts/fib.json',
-  sum = 'asts/sum.json'
-}
-
 for k, v in pairs({
-  print = astPaths.print,
-  sumAst = astPaths.sum,
-  fibAst = astPaths.fib -- expected: 55 || 13
+  print = 'asts/print.json',
+  fib = 'asts/fib.json',
+  sum = 'asts/sum.json',
+  -- combination = 'asts/combination.json',
 }) do
   print('Interpreting "' .. k .. '" AST')
   local ast = readFile(v)

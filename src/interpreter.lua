@@ -44,27 +44,41 @@ local interpreter = class({
     end,
 
     Call = function (self, ast)
-      local fn = self:interpret(ast.callee)
-      local calleeArgs = ast.arguments
-      local fnParams = fn.parameters
-      local fnBody = fn.value
+      local fnDecl = self:interpret(ast.callee)
 
+      -- push a new scope for the function
       self._symtab:pushScope()
-      for i, v in ipairs(fnParams) do
-        local arg = self:interpret(calleeArgs[i])
-        self._symtab:define(v.text, arg)
+
+      -- define the parameters in the new scope
+      local fn = self:interpret(fnDecl)
+
+      -- load the arguments into the new scope
+      for i, v in pairs(ast.arguments) do
+        local arg = self:interpret(v)
+        self._symtab:define(fnDecl.parameters[i].text, arg)
       end
-      local result = self:interpret(fnBody)
+
+      -- interpret the function body
+      local result = self:interpret(fn)
+
+      -- pop the scope
       self._symtab:popScope()
+
       return result
     end,
 
     Var = function (self, ast)
-      local res = self._symtab:lookup(ast.text)
-      return res
+      return self._symtab:lookup(ast.text)
     end,
 
     Int = function (self, ast)
+      return ast.value
+    end,
+
+    Function = function (self, ast)
+      for _, v in pairs(ast.parameters) do
+        self._symtab:define(v.text, nil)
+      end
       return ast.value
     end,
 
