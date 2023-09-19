@@ -157,7 +157,7 @@
         "arguments": [
           {
             "kind": "Int",
-            "value": 30,
+            "value": 10,
             "location": {
               "start": 101,
               "end": 103,
