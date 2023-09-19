@@ -1,34 +1,34 @@
-local Scope = {
-  name = '',
-  level = 0,
-  parentScope = {},
-  symbols = {},
-}
-Scope.__index = Scope
+local class = require "lib.class"
 
-function Scope:new(params)
-  local instance = {}
-  setmetatable(instance, self)
-  instance.name = params.name
-  instance.level = params.level
-  instance.parentScope = params.parentScope
-  instance.symbols = params.symbols or {}
-  return instance
-end
+local Scope = class({
+  constructor = function (self, params)
+    self.name = params.name
+    self.level = params.level
+    self.parentScope = params.parentScope
+    self.symbols = {}
+  end,
+  methods = {
+    lookup = function (self, name)
+      local symbol = self.symbols[name]
+      if symbol then
+        return symbol
+      end
+      if self.parentScope then
+        return self.parentScope:lookup(name)
+      end
+      return nil
+    end,
 
-function Scope:lookup(name)
-  local symbol = self.symbols[name]
-  if symbol then
-    return symbol
-  end
-  if self.parentScope then
-    return self.parentScope:lookup(name)
-  end
-  return nil
-end
+    define = function (self, name, value)
+        self.symbols[name] = value
+    end,
 
-function Scope:define(name, value)
-    self.symbols[name] = value
-end
+    _log = function (self, ...)
+      if self._allowLog then
+        print('[SymTab]: ' .. ...)
+      end
+    end
+  }
+})
 
 return Scope

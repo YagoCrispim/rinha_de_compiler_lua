@@ -91,8 +91,7 @@ local Interpreter = class({
         valB = self:interpret(valB)
       end
 
-      local result = op(valA, valB)
-      return result
+      return op(valA, valB)
     end
   }
 })
