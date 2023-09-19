@@ -68,10 +68,10 @@ local function class(classDefinition)
             local function validateSuperCall(classDef)
                 if classDef.extends and wasSuperCalled == 0 then
                     if classDefinition.name and classDefinition.name ~= "" then
-                        Err("[ERROR]: Super constructor was not called in " .. classDefinition.name .. ".")
+                        print("[ERROR]: Super constructor was not called in " .. classDefinition.name .. ".")
                         os.exit(1)
                     else
-                        Err("[ERROR]: Some class is missing a super constructor call.")
+                        print("[ERROR]: Some class is missing a super constructor call.")
                         os.exit(1)
                     end
                 end
