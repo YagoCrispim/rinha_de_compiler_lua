@@ -1,69 +1,79 @@
-local class = require "lib.class"
+---@diagnostic disable: undefined-field
 
-local Scope = class({
-  constructor = function (self, params)
-    self.name = params.name
-    self.level = params.level
-    self.parentScope = params.parentScope
-    self.symbols = {}
-  end,
-  methods = {
-    lookup = function (self, name)
-      local symbol = self.symbols[name]
-      if symbol then
-        return symbol
-      end
-      if self.parentScope then
-        return self.parentScope:lookup(name)
-      end
-      return nil
-    end,
+------ Scope table ------
+local Scope = {
+  name = '',
+  level = 0,
+  parentScope = nil,
+  symbols = {},
+}
+Scope.__index = Scope
 
-    define = function (self, name, value)
-        self.symbols[name] = value
-    end,
+function Scope:new(params)
+  local instance = {}
+  setmetatable(instance, self)
+  instance.name = params and params.name or ''
+  instance.level = params and params.level or 0
+  instance.parentScope = params and params.parentScope or nil
+  instance.symbols = params and params.symbols or {}
+  return instance
+end
 
-    _log = function (self, ...)
-      if self._allowLog then
-        print('[SymTab]: ' .. ...)
-      end
-    end
+function Scope:lookup(name)
+  local symbol = self.symbols[name]
+  if symbol then
+    return symbol
+  end
+  if self.parentScope then
+    return self.parentScope:lookup(name)
+  end
+  return nil
+end
+
+function Scope:define(name, value)
+    self.symbols[name] = value
+end
+------ End Scope table ------
+
+------ SymbolTable table ------
+local SymbolTable = {}
+SymbolTable.__index = SymbolTable
+
+function SymbolTable:new()
+  local instance = {
+    parentScope = nil,
+    currentScope = {},
   }
-})
+  setmetatable(instance, self)
+  instance.currentScope = Scope:new({
+    name = 'global',
+    level = 0,
+    parentScope = nil
+  })
+  return instance
+end
 
-local SymbolTable = class({
-  constructor = function (self)
-    self.parentScope = nil
-    self.currentScope = Scope:new({
-      name = 'global',
-      level = 0,
-      parentScope = nil
-    })
-  end,
-  methods = {
-    pushScope = function (self)
-      self.currentScope.level = self.currentScope.level + 1
-      local newScope = Scope:new({
-        level = self.currentScope.level,
-        name = 'scope' .. self.currentScope.level,
-        parentScope = self.currentScope
-      })
-      self.currentScope = newScope
-    end,
+function SymbolTable:pushScope()
+  self.currentScope.level = self.currentScope.level + 1
+  local newScope = Scope:new({
+    level = self.currentScope.level,
+    name = 'scope' .. self.currentScope.level,
+    parentScope = self.currentScope
+  })
+  self.currentScope = newScope
+end
 
-    popScope = function (self)
-      self.currentScope = self.currentScope.parentScope
-      self.currentScope.level = self.currentScope.level - 1
-    end,
+function SymbolTable:popScope()
+  self.currentScope = self.currentScope.parentScope
+  self.currentScope.level = self.currentScope.level - 1
+end
 
-    lookup = function (self, name)
-      return self.currentScope:lookup(name)
-    end,
+function SymbolTable:lookup(name)
+  return self.currentScope:lookup(name)
+end
 
-    define = function (self, name, value)
-      self.currentScope:define(name, value)
-    end,
-  }
-})
+function SymbolTable:define(name, value)
+  self.currentScope:define(name, value)
+end
 
 return SymbolTable
