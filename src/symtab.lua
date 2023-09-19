@@ -1,43 +1,69 @@
-local Scope = require "src.scope"
+local class = require "lib.class"
 
-local SymbolTable = {}
-SymbolTable.__index = SymbolTable
+local Scope = class({
+  constructor = function (self, params)
+    self.name = params.name
+    self.level = params.level
+    self.parentScope = params.parentScope
+    self.symbols = {}
+  end,
+  methods = {
+    lookup = function (self, name)
+      local symbol = self.symbols[name]
+      if symbol then
+        return symbol
+      end
+      if self.parentScope then
+        return self.parentScope:lookup(name)
+      end
+      return nil
+    end,
 
-function SymbolTable:new()
-  local instance = {
-    parentScope = nil,
-    currentScope = {},
+    define = function (self, name, value)
+        self.symbols[name] = value
+    end,
+
+    _log = function (self, ...)
+      if self._allowLog then
+        print('[SymTab]: ' .. ...)
+      end
+    end
   }
-  setmetatable(instance, self)
-  instance.currentScope = Scope:new({
-    name = 'global',
-    level = 0,
-    parentScope = nil
-  })
-  return instance
-end
+})
 
-function SymbolTable:pushScope()
-  self.currentScope.level = self.currentScope.level + 1
-  local newScope = Scope:new({
-    level = self.currentScope.level,
-    name = 'scope' .. self.currentScope.level,
-    parentScope = self.currentScope
-  })
-  self.currentScope = newScope
-end
+local SymbolTable = class({
+  constructor = function (self)
+    self.parentScope = nil
+    self.currentScope = Scope:new({
+      name = 'global',
+      level = 0,
+      parentScope = nil
+    })
+  end,
+  methods = {
+    pushScope = function (self)
+      self.currentScope.level = self.currentScope.level + 1
+      local newScope = Scope:new({
+        level = self.currentScope.level,
+        name = 'scope' .. self.currentScope.level,
+        parentScope = self.currentScope
+      })
+      self.currentScope = newScope
+    end,
 
-function SymbolTable:popScope()
-  self.currentScope = self.currentScope.parentScope
-  self.currentScope.level = self.currentScope.level - 1
-end
+    popScope = function (self)
+      self.currentScope = self.currentScope.parentScope
+      self.currentScope.level = self.currentScope.level - 1
+    end,
 
-function SymbolTable:lookup(name)
-  return self.currentScope:lookup(name)
-end
+    lookup = function (self, name)
+      return self.currentScope:lookup(name)
+    end,
 
-function SymbolTable:define(name, value)
-  self.currentScope:define(name, value)
-end
+    define = function (self, name, value)
+      self.currentScope:define(name, value)
+    end,
+  }
+})
 
 return SymbolTable

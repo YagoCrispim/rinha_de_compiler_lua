@@ -1,5 +1,5 @@
-local io = require 'io'
 local json = require 'lib.json'
+local io = require 'io'
 local Interpreter = require "src.interpreter"
 
 local function readFile(path)
@@ -12,6 +12,7 @@ local function readFile(path)
   return content
 end
 
+local interpreter = Interpreter:new()
 for k, v in pairs({
   print = 'asts/print.json',
   fib = 'asts/fib.json',
@@ -19,6 +20,7 @@ for k, v in pairs({
   combination = 'asts/combination.json',
 }) do
   print('Interpreting "' .. k .. '" AST')
-  Interpreter:new():interpret(json.decode(readFile(v)))
+  local ast = readFile(v)
+  interpreter:interpret(json.decode(ast), {})
   print('------------------')
 end

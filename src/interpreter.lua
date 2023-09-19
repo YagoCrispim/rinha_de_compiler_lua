@@ -1,106 +1,100 @@
+local class = require "lib.class"
 local SymbolTable = require "src.symtab"
 
-local Interpreter = {
-  _operations = {
-    Eq = function (valA, valB)
-      return valA == valB
+local Op = {
+  Eq = function (valA, valB)
+    return valA == valB
+  end,
+  Sub = function (valA, valB)
+    return valA - valB
+  end,
+  Add = function (valA, valB)
+    return valA + valB
+  end,
+  Lt = function (valA, valB)
+    return valA < valB
+  end,
+  Or = function (valA, valB)
+    return valA or valB
+  end,
+}
+
+local Interpreter = class({
+  constructor = function (self)
+    self._symtab = SymbolTable:new()
+    self._allowLog = false
+    self._operations = Op
+  end,
+  methods = {
+    interpret = function (self, ast)
+      if ast.expression then
+        return self:interpret(ast.expression)
+      end
+      return self[ast.kind](self, ast)
     end,
-    Sub = function (valA, valB)
-      return valA - valB
+
+    Print = function (self, ast)
+      print(self:interpret(ast.value))
     end,
-    Add = function (valA, valB)
-      return valA + valB
+
+    Str = function (_, ast)
+      return ast.value
     end,
-    Lt = function (valA, valB)
-      return valA < valB
+
+    Let = function (self, ast)
+      self._symtab:define(ast.name.text, ast.value)
+      return self:interpret(ast.next)
     end,
-    Or = function (valA, valB)
-      return valA or valB
+
+    Call = function (self, ast)
+      local fnDecl = self:interpret(ast.callee)
+      self._symtab:pushScope()
+
+      for i, v in pairs(ast.arguments) do
+        local arg = self:interpret(v)
+        self._symtab:define(fnDecl.parameters[i].text, arg)
+      end
+
+      local result = self:interpret(fnDecl.value)
+      self._symtab:popScope()
+      return result
+    end,
+
+    Var = function (self, ast)
+      return self._symtab:lookup(ast.text)
+    end,
+
+    Int = function (_, ast)
+      return ast.value
+    end,
+
+    If = function (self, ast)
+      local condition = self:interpret(ast.condition)
+      if condition then
+        return self:interpret(ast['then'])
+      else
+        return self:interpret(ast.otherwise)
+      end
+    end,
+
+    Binary = function (self, ast)
+      local opName = ast.op
+      local op = self._operations[opName]
+      local valA = self:interpret(ast.lhs)
+      local valB = self:interpret(ast.rhs)
+
+      if type(valA) == 'table' then
+        valA = self:interpret(valA)
+      end
+
+      if type(valB) == 'table' then
+        valB = self:interpret(valB)
+      end
+
+      local result = op(valA, valB)
+      return result
     end
   }
-}
-Interpreter.__index = Interpreter
-
-function Interpreter:new()
-  local instance = {
-    _symtab = SymbolTable:new(),
-    _allowLog = false
-  }
-    setmetatable(instance, Interpreter)
-    return instance
-end
-
-function Interpreter:interpret(ast)
-  if ast.expression then
-    return self:interpret(ast.expression)
-  end
-  return self[ast.kind](self, ast)
-end
-
-function Interpreter:Print(ast)
-  local value = self:interpret(ast.value)
-  print(value)
-end
-
-function Interpreter:Str(ast)
-  return ast.value
-end
-
-function Interpreter:Let(ast)
-  self._symtab:define(ast.name.text, ast.value)
-  return self:interpret(ast.next)
-end
-
-function Interpreter:Call(ast)
-  local fnDecl = self:interpret(ast.callee)
-
-  self._symtab:pushScope()
-
-  for i, v in pairs(ast.arguments) do
-    local arg = self:interpret(v)
-    self._symtab:define(fnDecl.parameters[i].text, arg)
-  end
-
-  local result = self:interpret(fnDecl.value)
-
-  self._symtab:popScope()
-
-  return result
-end
-
-function Interpreter:Var(ast)
-  return self._symtab:lookup(ast.text)
-end
-
-function Interpreter:Int(ast)
-  return ast.value
-end
-
-function Interpreter:If(ast)
-  local condition = self:interpret(ast.condition)
-  if condition then
-    return self:interpret(ast['then'])
-  else
-    return self:interpret(ast.otherwise)
-  end
-end
-
-function Interpreter:Binary(ast)
-  local opName = ast.op
-  local op = self._operations[opName]
-  local valA = self:interpret(ast.lhs)
-  local valB = self:interpret(ast.rhs)
-
-  if type(valA) == 'table' then
-    valA = self:interpret(valA)
-  end
-
-  if type(valB) == 'table' then
-    valB = self:interpret(valB)
-  end
-
-  local result = op(valA, valB)
-  return result
-end
+})
 
 return Interpreter
