@@ -20,7 +20,7 @@ local Scope = class({
     end,
 
     define = function (self, name, value)
-      self.symbols[name] = value
+        self.symbols[name] = value
     end,
 
     _log = function (self, ...)
@@ -42,18 +42,18 @@ local SymbolTable = class({
   end,
   methods = {
     pushScope = function (self)
-      local parentScope = self.currentScope
-      self.currentScope = Scope:new({
-        name = 'scope' .. self.currentScope.level + 1,
-        level = self.currentScope.level + 1,
-        parentScope = parentScope
+      self.currentScope.level = self.currentScope.level + 1
+      local newScope = Scope:new({
+        level = self.currentScope.level,
+        name = 'scope' .. self.currentScope.level,
+        parentScope = self.currentScope
       })
+      self.currentScope = newScope
     end,
 
     popScope = function (self)
-      local currentScope = self.currentScope.parentScope
-      currentScope.level = currentScope.level - 1
-      self.currentScope = currentScope
+      self.currentScope = self.currentScope.parentScope
+      self.currentScope.level = self.currentScope.level - 1
     end,
 
     lookup = function (self, name)
