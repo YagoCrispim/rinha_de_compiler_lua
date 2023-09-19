@@ -9,10 +9,10 @@
             - default = 3
 ]]
 local function getCurrentPathAndLine(levels)
-    local levesToGoUp = levels or 3
+    -- local levesToGoUp = levels or 3
     return {
-        path = debug.getinfo(levesToGoUp, "S").source,
-        line = debug.getinfo(levesToGoUp, "l").currentline,
+        -- path = debug.getinfo(levesToGoUp, "S").source,
+        -- line = debug.getinfo(levesToGoUp, "l").currentline,
     }
 end
 

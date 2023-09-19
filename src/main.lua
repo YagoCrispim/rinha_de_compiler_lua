@@ -16,9 +16,9 @@ local function readFile(path)
 end
 
 for k, v in pairs({
-  -- print = 'asts/print.json',
-  -- fib = 'asts/fib.json',
-  -- sum = 'asts/sum.json',
+  print = 'asts/print.json',
+  fib = 'asts/fib.json',
+  sum = 'asts/sum.json',
   combination = 'asts/combination.json',
 }) do
   print('Interpreting "' .. k .. '" AST')
