@@ -1,9 +1,6 @@
-local json = require 'lib.json'
 local io = require 'io'
-local interpreter = require "src.interpreter"
-
--- global
-D = require "lib.tabledump"
+local json = require 'lib.json'
+local Interpreter = require "src.interpreter"
 
 local function readFile(path)
   local file = io.open(path, 'r')
@@ -22,7 +19,6 @@ for k, v in pairs({
   combination = 'asts/combination.json',
 }) do
   print('Interpreting "' .. k .. '" AST')
-  local ast = readFile(v)
-  interpreter:new():interpret(json.decode(ast), {})
+  Interpreter:new():interpret(json.decode(readFile(v)))
   print('------------------')
 end

@@ -37,6 +37,18 @@
   - user 0m14,186s
   - sys 0m0,004s
 
+- Test 3
+
+  - real 0m13,827s
+  - user 0m13,809s
+  - sys 0m0,004s
+
+- Test 4
+
+  - real 0m14,601s
+  - user 0m14,591s
+  - sys 0m0,004s
+
 ---
 
 ## Lua
@@ -66,3 +78,15 @@
   - real 0m13,508s
   - user 0m13,486s
   - sys 0m0,017s
+
+- Test 3
+
+  - real 0m13,205s
+  - user 0m13,117s
+  - sys 0m0,016s
+
+- Test 4
+
+  - real 0m13,310s
+  - user 0m13,296s
+  - sys 0m0,004s

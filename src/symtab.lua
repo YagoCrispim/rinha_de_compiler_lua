@@ -1,6 +1,5 @@
 ---@diagnostic disable: undefined-field
 
------- Scope table ------
 local Scope = {
   name = '',
   level = 0,
@@ -33,9 +32,7 @@ end
 function Scope:define(name, value)
     self.symbols[name] = value
 end
------- End Scope table ------
 
------- SymbolTable table ------
 local SymbolTable = {}
 SymbolTable.__index = SymbolTable
 
