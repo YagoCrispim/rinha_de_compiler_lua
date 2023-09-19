@@ -19,7 +19,7 @@ for k, v in pairs({
   print = 'asts/print.json',
   fib = 'asts/fib.json',
   sum = 'asts/sum.json',
-  -- combination = 'asts/combination.json',
+  combination = 'asts/combination.json',
 }) do
   print('Interpreting "' .. k .. '" AST')
   local ast = readFile(v)
