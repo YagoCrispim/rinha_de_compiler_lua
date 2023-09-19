@@ -1,35 +1,18 @@
 #!/bin/bash
 
-FILE="src/main.lua"
-eval $(luarocks path)
+FLAG=$1
 
-function clear_screen() {
-    clear
+function echotitle() {
+    echo "--------------------"
+    echo "Running with $1"
+    echo "--------------------"
 }
 
-clear_screen
+if [ "$USEJIT" = "jit" ]; then
+    echotitle "luajit"
+    time luajit src/main.lua
+else
+    echotitle "lua"
+    time lua src/main.lua
+fi
 
-lua $FILE &
-
-# get the PID of the last process
-PID=$!
-
-# kill the server when the server is modified
-trap "kill $PID" SIGINT
-
-# watch for changes
-# while inotifywait -r -q -e modify src; do
-while inotifywait -r -q -e modify .; do
-    eval $(luarocks path)
-    # kill the server
-    kill $PID
-
-    # clear the screen and write header
-    clear_screen
-
-    # start the server
-    lua $FILE &
-
-    # get the PID of the last process
-    PID=$!
-done
