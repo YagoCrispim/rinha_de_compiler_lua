@@ -1,44 +1,43 @@
 local class = require "lib.class"
 local SymbolTable = require "src.symtab"
 
-local interpreter = class({
+local Op = {
+  Eq = function (valA, valB)
+    return valA == valB
+  end,
+  Sub = function (valA, valB)
+    return valA - valB
+  end,
+  Add = function (valA, valB)
+    return valA + valB
+  end,
+  Lt = function (valA, valB)
+    return valA < valB
+  end,
+  Or = function (valA, valB)
+    return valA or valB
+  end,
+}
+
+local Interpreter = class({
   constructor = function (self)
-    self.c = 0
     self._symtab = SymbolTable:new()
     self._allowLog = false
-    self._operations = {
-      Eq = function (valA, valB)
-        return valA == valB
-      end,
-      Sub = function (valA, valB)
-        return valA - valB
-      end,
-      Add = function (valA, valB)
-        return valA + valB
-      end,
-      Lt = function (valA, valB)
-        return valA < valB
-      end,
-      Or = function (valA, valB)
-        return valA or valB
-      end,
-    }
+    self._operations = Op
   end,
   methods = {
     interpret = function (self, ast)
       if ast.expression then
         return self:interpret(ast.expression)
       end
-      self:_log('Calling', ast.kind)
       return self[ast.kind](self, ast)
     end,
 
     Print = function (self, ast)
-      local value = self:interpret(ast.value)
-      print(value)
+      print(self:interpret(ast.value))
     end,
 
-    Str = function (self, ast)
+    Str = function (_, ast)
       return ast.value
     end,
 
@@ -49,22 +48,15 @@ local interpreter = class({
 
     Call = function (self, ast)
       local fnDecl = self:interpret(ast.callee)
-
-      -- push a new scope for the function
       self._symtab:pushScope()
 
-      -- load the arguments into the new scope
       for i, v in pairs(ast.arguments) do
         local arg = self:interpret(v)
         self._symtab:define(fnDecl.parameters[i].text, arg)
       end
 
-      -- interpret the function body
       local result = self:interpret(fnDecl.value)
-
-      -- pop the scope
       self._symtab:popScope()
-
       return result
     end,
 
@@ -72,14 +64,13 @@ local interpreter = class({
       return self._symtab:lookup(ast.text)
     end,
 
-    Int = function (self, ast)
+    Int = function (_, ast)
       return ast.value
     end,
 
     If = function (self, ast)
       local condition = self:interpret(ast.condition)
       if condition then
-        -- breakpoint cond: ast['then'].kind == 'Int' and ast['then'].value == 1 and self.c == 89
         return self:interpret(ast['then'])
       else
         return self:interpret(ast.otherwise)
@@ -87,8 +78,6 @@ local interpreter = class({
     end,
 
     Binary = function (self, ast)
-      self.c = self.c + 1
-
       local opName = ast.op
       local op = self._operations[opName]
       local valA = self:interpret(ast.lhs)
@@ -104,15 +93,8 @@ local interpreter = class({
 
       local result = op(valA, valB)
       return result
-    end,
-
-    _log = function (self, ...)
-      if self._allowLog then
-        local currentLine = debug.getinfo(2).currentline
-        print('[Line: ' .. currentLine .. ']' .. ' >>> ',  ...)
-      end
-    end,
+    end
   }
 })
 
-return interpreter
+return Interpreter
