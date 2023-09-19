@@ -1,37 +1,4 @@
----@diagnostic disable: undefined-field
-
-local Scope = {
-  name = '',
-  level = 0,
-  parentScope = nil,
-  symbols = {},
-}
-Scope.__index = Scope
-
-function Scope:new(params)
-  local instance = {}
-  setmetatable(instance, self)
-  instance.name = params and params.name or ''
-  instance.level = params and params.level or 0
-  instance.parentScope = params and params.parentScope or nil
-  instance.symbols = params and params.symbols or {}
-  return instance
-end
-
-function Scope:lookup(name)
-  local symbol = self.symbols[name]
-  if symbol then
-    return symbol
-  end
-  if self.parentScope then
-    return self.parentScope:lookup(name)
-  end
-  return nil
-end
-
-function Scope:define(name, value)
-    self.symbols[name] = value
-end
+local Scope = require "src.scope"
 
 local SymbolTable = {}
 SymbolTable.__index = SymbolTable
