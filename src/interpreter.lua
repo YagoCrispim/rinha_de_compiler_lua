@@ -3,21 +3,25 @@ local SymbolTable = require "src.symtab"
 
 local interpreter = class({
   constructor = function (self)
+    self.c = 0
     self._symtab = SymbolTable:new()
     self._allowLog = false
     self._operations = {
-      ["Eq"] = function (valA, valB)
+      Eq = function (valA, valB)
         return valA == valB
       end,
-      ["Sub"] = function (valA, valB)
+      Sub = function (valA, valB)
         return valA - valB
       end,
-      ["Add"] = function (valA, valB)
+      Add = function (valA, valB)
         return valA + valB
       end,
-      ["Lt"] = function (valA, valB)
+      Lt = function (valA, valB)
         return valA < valB
-      end
+      end,
+      Or = function (valA, valB)
+        return valA or valB
+      end,
     }
   end,
   methods = {
@@ -40,7 +44,7 @@ local interpreter = class({
 
     Let = function (self, ast)
       self._symtab:define(ast.name.text, ast.value)
-      self:interpret(ast.next)
+      return self:interpret(ast.next)
     end,
 
     Call = function (self, ast)
@@ -49,9 +53,6 @@ local interpreter = class({
       -- push a new scope for the function
       self._symtab:pushScope()
 
-      -- define the parameters in the new scope
-      local fn = self:interpret(fnDecl)
-
       -- load the arguments into the new scope
       for i, v in pairs(ast.arguments) do
         local arg = self:interpret(v)
@@ -59,7 +60,7 @@ local interpreter = class({
       end
 
       -- interpret the function body
-      local result = self:interpret(fn)
+      local result = self:interpret(fnDecl.value)
 
       -- pop the scope
       self._symtab:popScope()
@@ -75,16 +76,10 @@ local interpreter = class({
       return ast.value
     end,
 
-    Function = function (self, ast)
-      for _, v in pairs(ast.parameters) do
-        self._symtab:define(v.text, nil)
-      end
-      return ast.value
-    end,
-
     If = function (self, ast)
       local condition = self:interpret(ast.condition)
       if condition then
+        -- breakpoint cond: ast['then'].kind == 'Int' and ast['then'].value == 1 and self.c == 89
         return self:interpret(ast['then'])
       else
         return self:interpret(ast.otherwise)
@@ -92,9 +87,21 @@ local interpreter = class({
     end,
 
     Binary = function (self, ast)
-      local op = self._operations[ast.op]
+      self.c = self.c + 1
+
+      local opName = ast.op
+      local op = self._operations[opName]
       local valA = self:interpret(ast.lhs)
       local valB = self:interpret(ast.rhs)
+
+      if type(valA) == 'table' then
+        valA = self:interpret(valA)
+      end
+
+      if type(valB) == 'table' then
+        valB = self:interpret(valB)
+      end
+
       local result = op(valA, valB)
       return result
     end,
