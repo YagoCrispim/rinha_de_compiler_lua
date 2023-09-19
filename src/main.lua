@@ -1,9 +1,6 @@
 local json = require 'lib.json'
 local io = require 'io'
-local interpreter = require "src.interpreter"
-
--- global
-D = require "lib.tabledump"
+local Interpreter = require "src.interpreter"
 
 local function readFile(path)
   local file = io.open(path, 'r')
@@ -15,6 +12,7 @@ local function readFile(path)
   return content
 end
 
+local interpreter = Interpreter:new()
 for k, v in pairs({
   print = 'asts/print.json',
   fib = 'asts/fib.json',
@@ -23,6 +21,6 @@ for k, v in pairs({
 }) do
   print('Interpreting "' .. k .. '" AST')
   local ast = readFile(v)
-  interpreter:new():interpret(json.decode(ast), {})
+  interpreter:interpret(json.decode(ast), {})
   print('------------------')
 end

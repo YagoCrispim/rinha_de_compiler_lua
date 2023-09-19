@@ -15,4 +15,3 @@ else
     echotitle "lua"
     time lua src/main.lua
 fi
-
