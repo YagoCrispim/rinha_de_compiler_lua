@@ -1,6 +1,8 @@
 local class = require "lib.class"
 local SymbolTable = require "src.symtab"
 
+local memo = {}
+
 local Op = {
   Eq = function (valA, valB)
     return valA == valB
@@ -41,7 +43,7 @@ local Interpreter = class({
 
     Print = function (self, ast)
       local value = self:interpret(ast.value)
-      
+
       if type(value) == "table" and value._type and value._type == "Tuple" then
         local result = ('(' .. value.first .. ', ' .. value.second .. ')')
         print(result)
@@ -62,14 +64,33 @@ local Interpreter = class({
 
     Call = function (self, ast)
       local fnDecl = self:interpret(ast.callee)
-      self._symtab:pushScope()
+      local fnArgs = {}
 
+      local memoizedFn = nil
       for i, v in pairs(ast.arguments) do
         local arg = self:interpret(v)
-        self._symtab:define(fnDecl.parameters[i].text, arg)
+
+        if #ast.arguments == 1 then
+          memoizedFn = ast.callee.text .. arg
+        end
+
+        fnArgs[fnDecl.parameters[i].text] = arg
       end
 
+      if memoizedFn and memo[memoizedFn] then
+        return memo[memoizedFn]
+      end
+
+      self._symtab:pushScope()
+      for i, v in pairs(fnArgs) do
+        self._symtab:define(i, v)
+      end
       local result = self:interpret(fnDecl.value)
+
+      if memoizedFn then
+        memo[memoizedFn] = result
+      end
+
       self._symtab:popScope()
       return result
     end,
