@@ -2,7 +2,6 @@ local class = require "lib.class"
 
 local Scope = class({
   constructor = function (self, params)
-    self.level = params.level
     self.parentScope = params.parentScope
     self.symbols = {}
   end,
@@ -15,7 +14,6 @@ local Scope = class({
       if self.parentScope then
         return self.parentScope:lookup(name)
       end
-      return nil
     end,
 
     define = function (self, name, value)
