@@ -40,7 +40,15 @@ local Interpreter = class({
     end,
 
     Print = function (self, ast)
-      print(self:interpret(ast.value))
+      local value = self:interpret(ast.value)
+      
+      if type(value) == "table" and value._type and value._type == "Tuple" then
+        local result = ('(' .. value.first .. ', ' .. value.second .. ')')
+        print(result)
+        return result
+      end
+      print(value)
+      return value
     end,
 
     Str = function (_, ast)
@@ -98,7 +106,15 @@ local Interpreter = class({
       end
 
       return op(valA, valB)
-    end
+    end,
+
+    Tuple = function (self, ast)
+      return {
+        _type = "Tuple",
+        first = self:interpret(ast.first),
+        second = self:interpret(ast.second),
+      }
+    end,
   }
 })
 
