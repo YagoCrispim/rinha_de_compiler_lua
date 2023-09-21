@@ -5,23 +5,18 @@ local SymbolTable = class({
   constructor = function (self)
     self.parentScope = nil
     self.currentScope = Scope:new({
-      level = 0,
       parentScope = nil
     })
   end,
   methods = {
     pushScope = function (self)
-      self.currentScope.level = self.currentScope.level + 1
-      local newScope = Scope:new({
-        level = self.currentScope.level,
+      self.currentScope = Scope:new({
         parentScope = self.currentScope
       })
-      self.currentScope = newScope
     end,
 
     popScope = function (self)
       self.currentScope = self.currentScope.parentScope
-      self.currentScope.level = self.currentScope.level - 1
     end,
 
     lookup = function (self, name)
