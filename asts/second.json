@@ -1,0 +1,75 @@
+{
+  "name": "files/second.rinha",
+  "expression": {
+    "kind": "Let",
+    "name": {
+      "text": "t",
+      "location": {
+        "start": 4,
+        "end": 5,
+        "filename": "files/second.rinha"
+      }
+    },
+    "value": {
+      "kind": "Tuple",
+      "first": {
+        "kind": "Int",
+        "value": 100,
+        "location": {
+          "start": 9,
+          "end": 12,
+          "filename": "files/second.rinha"
+        }
+      },
+      "second": {
+        "kind": "Int",
+        "value": 200,
+        "location": {
+          "start": 14,
+          "end": 17,
+          "filename": "files/second.rinha"
+        }
+      },
+      "location": {
+        "start": 8,
+        "end": 18,
+        "filename": "files/second.rinha"
+      }
+    },
+    "next": {
+      "kind": "Print",
+      "value": {
+        "kind": "Second",
+        "value": {
+          "kind": "Var",
+          "text": "t",
+          "location": {
+            "start": 33,
+            "end": 34,
+            "filename": "files/second.rinha"
+          }
+        },
+        "location": {
+          "start": 26,
+          "end": 35,
+          "filename": "files/second.rinha"
+        }
+      },
+      "location": {
+        "start": 20,
+        "end": 36,
+        "filename": "files/second.rinha"
+      }
+    },
+    "location": {
+      "start": 0,
+      "end": 36,
+      "filename": "files/second.rinha"
+    }
+  },
+  "location": {
+    "start": 0,
+    "end": 36,
+    "filename": "files/second.rinha"
+  }
+}

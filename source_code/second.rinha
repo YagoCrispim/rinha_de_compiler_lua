@@ -1,0 +1,2 @@
+let t = (100, 200);
+print(second(t))

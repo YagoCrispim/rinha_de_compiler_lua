@@ -1,0 +1,43 @@
+{
+  "name": "files/sub.rinha",
+  "expression": {
+    "kind": "Print",
+    "value": {
+      "kind": "Binary",
+      "lhs": {
+        "kind": "Int",
+        "value": 1,
+        "location": {
+          "start": 6,
+          "end": 7,
+          "filename": "files/sub.rinha"
+        }
+      },
+      "op": "Sub",
+      "rhs": {
+        "kind": "Int",
+        "value": 10,
+        "location": {
+          "start": 10,
+          "end": 12,
+          "filename": "files/sub.rinha"
+        }
+      },
+      "location": {
+        "start": 6,
+        "end": 12,
+        "filename": "files/sub.rinha"
+      }
+    },
+    "location": {
+      "start": 0,
+      "end": 13,
+      "filename": "files/sub.rinha"
+    }
+  },
+  "location": {
+    "start": 0,
+    "end": 13,
+    "filename": "files/sub.rinha"
+  }
+}

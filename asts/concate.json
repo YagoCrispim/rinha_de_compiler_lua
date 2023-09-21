@@ -1,0 +1,61 @@
+{
+  "name": "files/concate.rinha",
+  "expression": {
+    "kind": "Print",
+    "value": {
+      "kind": "Binary",
+      "lhs": {
+        "kind": "Str",
+        "value": "1 :",
+        "location": {
+          "start": 6,
+          "end": 11,
+          "filename": "files/concate.rinha"
+        }
+      },
+      "op": "Add",
+      "rhs": {
+        "kind": "Binary",
+        "lhs": {
+          "kind": "Int",
+          "value": 1,
+          "location": {
+            "start": 14,
+            "end": 15,
+            "filename": "files/concate.rinha"
+          }
+        },
+        "op": "Add",
+        "rhs": {
+          "kind": "Int",
+          "value": 10,
+          "location": {
+            "start": 18,
+            "end": 20,
+            "filename": "files/concate.rinha"
+          }
+        },
+        "location": {
+          "start": 14,
+          "end": 20,
+          "filename": "files/concate.rinha"
+        }
+      },
+      "location": {
+        "start": 6,
+        "end": 20,
+        "filename": "files/concate.rinha"
+      }
+    },
+    "location": {
+      "start": 0,
+      "end": 21,
+      "filename": "files/concate.rinha"
+    }
+  },
+  "location": {
+    "start": 0,
+    "end": 21,
+    "filename": "files/concate.rinha"
+  }
+}
