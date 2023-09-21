@@ -9,6 +9,12 @@ local Op = {
     return valA - valB
   end,
   Add = function (valA, valB)
+    if type(valA) == 'string' and type(valB) ~= 'string' then
+      return valA .. tostring(valB)
+    end
+    if type(valA) ~= 'string' and type(valB) == 'string' then
+      return tostring(valA) .. valB
+    end
     return valA + valB
   end,
   Lt = function (valA, valB)
