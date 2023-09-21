@@ -1,6 +1,14 @@
-local json = require 'lib.json'
 local io = require 'io'
+local json = require 'lib.json'
 local Interpreter = require "src.interpreter"
+
+local pathBaseName = 'asts/'
+local fileName = arg[1]
+
+if fileName == nil then
+  print('No file name provided')
+  return
+end
 
 local function readFile(path)
   local file = io.open(path, 'r')
@@ -13,14 +21,4 @@ local function readFile(path)
 end
 
 local interpreter = Interpreter:new()
-for k, v in pairs({
-  print = 'asts/print.json',
-  fib = 'asts/fib.json',
-  sum = 'asts/sum.json',
-  combination = 'asts/combination.json',
-}) do
-  print('Interpreting "' .. k .. '" AST')
-  local ast = readFile(v)
-  interpreter:interpret(json.decode(ast), {})
-  print('------------------')
-end
+interpreter:interpret(json.decode(readFile(pathBaseName .. fileName .. '.json')))

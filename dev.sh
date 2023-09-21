@@ -3,6 +3,7 @@
 # Hot reload simulator
 
 FILE="src/main.lua"
+AST=$1
 
 function clear_screen() {
     clear
@@ -10,13 +11,13 @@ function clear_screen() {
 
 clear_screen
 
-lua $FILE &
+lua $FILE $AST &
 PID=$!
 trap "kill $PID" SIGINT
 
 while inotifywait -r -q -e modify .; do
     kill $PID
     clear_screen
-    lua $FILE &
+    lua $FILE $AST &
     PID=$!
 done
