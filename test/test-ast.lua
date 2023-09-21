@@ -28,15 +28,21 @@ end
 local interpreter = Interpreter:new()
 
 -- Fibonacci
-testerFn('Fibonacci', function()
+testerFn('Fibonacci (10)', function()
   local res = interpreter:interpret(json.decode(readFile(pathBaseName .. 'fib.json')))
-  return res == 832040
+  return res == 55
 end)
 
 -- Sum
 testerFn('Sum', function()
   local res = interpreter:interpret(json.decode(readFile(pathBaseName .. 'sum.json')))
   return res == 15
+end)
+
+-- Combination
+testerFn('Combination', function()
+  local res = interpreter:interpret(json.decode(readFile(pathBaseName .. 'combination.json')))
+  return res == 45
 end)
 
 -- Print tuple
