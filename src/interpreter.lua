@@ -58,6 +58,12 @@ local Interpreter = class({
     end,
 
     Let = function (self, ast)
+      if ast.value.kind ~= 'Function' then
+        local value = self:interpret(ast.value)
+        self._symtab:define(ast.name.text, value)
+        return self:interpret(ast.next)
+      end
+      
       self._symtab:define(ast.name.text, ast.value)
       return self:interpret(ast.next)
     end,
@@ -135,6 +141,16 @@ local Interpreter = class({
         first = self:interpret(ast.first),
         second = self:interpret(ast.second),
       }
+    end,
+
+    First = function (self, ast)
+      local tuple = self:interpret(ast.value)
+      return tuple.first
+    end,
+
+    Second = function (self, ast)
+      local tuple = self:interpret(ast.value)
+      return tuple.second
     end,
   }
 })
