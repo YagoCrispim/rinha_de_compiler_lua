@@ -1,4 +1,0 @@
-let f = fn(n)=> {
-  n
-};
-print(f)

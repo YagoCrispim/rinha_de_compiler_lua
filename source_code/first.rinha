@@ -1,2 +1,0 @@
-let t = (10, 20);
-print(second(t))

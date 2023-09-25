@@ -4,4 +4,4 @@ WORKDIR /app
 
 COPY . /app
 
-CMD lua src/main.lua $file
+CMD lua src/main.lua

@@ -7,20 +7,24 @@ An interpreter for ".rinha" files. Made for "Rinha de Compiladores" using Lua
 ✅ fib <br/>
 ✅ combination <br/>
 ✅ sum <br/>
-✅ print
+✅ print <br/>
+✅ first <br/>
+✅ second <br/>
+✅ sub <br/>
+✅ print_tuple <br/>
+✅ print_function <br/>
+✅ concate
 
-## Execution
+## Docker
+
+### Build
 
 ```bash
-./build.sh
-./run.sh <ast-name>
+docker build -t rinha-de-compiler-lua .
 ```
 
-### Execution examples
+### Run
 
-```
-./run.sh print
-./run.sh sum
-./run.sh combination
-./run.sh fib
+```bash
+docker run -v ./asts/{{FILE_NAME}}:/var/rinha/source.rinha.json --memory=2gb --cpus=2 rinha-de-compiler-lua
 ```
