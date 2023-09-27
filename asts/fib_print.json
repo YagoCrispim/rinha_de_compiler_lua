@@ -1,5 +1,5 @@
 {
-  "name": "files/fib.rinha",
+  "name": "/home/bees/Downloads/fibp.rinha",
   "expression": {
     "kind": "Let",
     "name": {
@@ -7,7 +7,7 @@
       "location": {
         "start": 4,
         "end": 7,
-        "filename": "files/fib.rinha"
+        "filename": "/home/bees/Downloads/fibp.rinha"
       }
     },
     "value": {
@@ -18,7 +18,7 @@
           "location": {
             "start": 14,
             "end": 15,
-            "filename": "files/fib.rinha"
+            "filename": "/home/bees/Downloads/fibp.rinha"
           }
         }
       ],
@@ -32,7 +32,7 @@
             "location": {
               "start": 28,
               "end": 29,
-              "filename": "files/fib.rinha"
+              "filename": "/home/bees/Downloads/fibp.rinha"
             }
           },
           "op": "Lt",
@@ -42,22 +42,30 @@
             "location": {
               "start": 32,
               "end": 33,
-              "filename": "files/fib.rinha"
+              "filename": "/home/bees/Downloads/fibp.rinha"
             }
           },
           "location": {
             "start": 28,
             "end": 33,
-            "filename": "files/fib.rinha"
+            "filename": "/home/bees/Downloads/fibp.rinha"
           }
         },
         "then": {
-          "kind": "Var",
-          "text": "n",
+          "kind": "Print",
+          "value": {
+            "kind": "Var",
+            "text": "n",
+            "location": {
+              "start": 47,
+              "end": 48,
+              "filename": "/home/bees/Downloads/fibp.rinha"
+            }
+          },
           "location": {
             "start": 41,
-            "end": 42,
-            "filename": "files/fib.rinha"
+            "end": 49,
+            "filename": "/home/bees/Downloads/fibp.rinha"
           }
         },
         "otherwise": {
@@ -68,9 +76,9 @@
               "kind": "Var",
               "text": "fib",
               "location": {
-                "start": 58,
-                "end": 61,
-                "filename": "files/fib.rinha"
+                "start": 65,
+                "end": 68,
+                "filename": "/home/bees/Downloads/fibp.rinha"
               }
             },
             "arguments": [
@@ -80,9 +88,9 @@
                   "kind": "Var",
                   "text": "n",
                   "location": {
-                    "start": 62,
-                    "end": 63,
-                    "filename": "files/fib.rinha"
+                    "start": 69,
+                    "end": 70,
+                    "filename": "/home/bees/Downloads/fibp.rinha"
                   }
                 },
                 "op": "Sub",
@@ -90,22 +98,22 @@
                   "kind": "Int",
                   "value": 1,
                   "location": {
-                    "start": 66,
-                    "end": 67,
-                    "filename": "files/fib.rinha"
+                    "start": 73,
+                    "end": 74,
+                    "filename": "/home/bees/Downloads/fibp.rinha"
                   }
                 },
                 "location": {
-                  "start": 62,
-                  "end": 67,
-                  "filename": "files/fib.rinha"
+                  "start": 69,
+                  "end": 74,
+                  "filename": "/home/bees/Downloads/fibp.rinha"
                 }
               }
             ],
             "location": {
-              "start": 58,
-              "end": 68,
-              "filename": "files/fib.rinha"
+              "start": 65,
+              "end": 75,
+              "filename": "/home/bees/Downloads/fibp.rinha"
             }
           },
           "op": "Add",
@@ -115,9 +123,9 @@
               "kind": "Var",
               "text": "fib",
               "location": {
-                "start": 71,
-                "end": 74,
-                "filename": "files/fib.rinha"
+                "start": 78,
+                "end": 81,
+                "filename": "/home/bees/Downloads/fibp.rinha"
               }
             },
             "arguments": [
@@ -127,9 +135,9 @@
                   "kind": "Var",
                   "text": "n",
                   "location": {
-                    "start": 75,
-                    "end": 76,
-                    "filename": "files/fib.rinha"
+                    "start": 82,
+                    "end": 83,
+                    "filename": "/home/bees/Downloads/fibp.rinha"
                   }
                 },
                 "op": "Sub",
@@ -137,40 +145,40 @@
                   "kind": "Int",
                   "value": 2,
                   "location": {
-                    "start": 79,
-                    "end": 80,
-                    "filename": "files/fib.rinha"
+                    "start": 86,
+                    "end": 87,
+                    "filename": "/home/bees/Downloads/fibp.rinha"
                   }
                 },
                 "location": {
-                  "start": 75,
-                  "end": 80,
-                  "filename": "files/fib.rinha"
+                  "start": 82,
+                  "end": 87,
+                  "filename": "/home/bees/Downloads/fibp.rinha"
                 }
               }
             ],
             "location": {
-              "start": 71,
-              "end": 81,
-              "filename": "files/fib.rinha"
+              "start": 78,
+              "end": 88,
+              "filename": "/home/bees/Downloads/fibp.rinha"
             }
           },
           "location": {
-            "start": 58,
-            "end": 81,
-            "filename": "files/fib.rinha"
+            "start": 65,
+            "end": 88,
+            "filename": "/home/bees/Downloads/fibp.rinha"
           }
         },
         "location": {
           "start": 24,
-          "end": 85,
-          "filename": "files/fib.rinha"
+          "end": 92,
+          "filename": "/home/bees/Downloads/fibp.rinha"
         }
       },
       "location": {
         "start": 10,
-        "end": 87,
-        "filename": "files/fib.rinha"
+        "end": 94,
+        "filename": "/home/bees/Downloads/fibp.rinha"
       }
     },
     "next": {
@@ -181,9 +189,9 @@
           "kind": "Var",
           "text": "fib",
           "location": {
-            "start": 96,
-            "end": 99,
-            "filename": "files/fib.rinha"
+            "start": 103,
+            "end": 106,
+            "filename": "/home/bees/Downloads/fibp.rinha"
           }
         },
         "arguments": [
@@ -191,33 +199,33 @@
             "kind": "Int",
             "value": 30,
             "location": {
-              "start": 100,
-              "end": 102,
-              "filename": "files/fib.rinha"
+              "start": 107,
+              "end": 109,
+              "filename": "/home/bees/Downloads/fibp.rinha"
             }
           }
         ],
         "location": {
-          "start": 96,
-          "end": 103,
-          "filename": "files/fib.rinha"
+          "start": 103,
+          "end": 110,
+          "filename": "/home/bees/Downloads/fibp.rinha"
         }
       },
       "location": {
-        "start": 90,
-        "end": 104,
-        "filename": "files/fib.rinha"
+        "start": 97,
+        "end": 111,
+        "filename": "/home/bees/Downloads/fibp.rinha"
       }
     },
     "location": {
       "start": 0,
-      "end": 104,
-      "filename": "files/fib.rinha"
+      "end": 111,
+      "filename": "/home/bees/Downloads/fibp.rinha"
     }
   },
   "location": {
     "start": 0,
-    "end": 104,
-    "filename": "files/fib.rinha"
+    "end": 111,
+    "filename": "/home/bees/Downloads/fibp.rinha"
   }
 }
