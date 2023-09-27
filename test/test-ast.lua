@@ -62,3 +62,9 @@ testerFn('Sub', function()
   local res = interpreter:interpret(json.decode(readFile(pathBaseName .. 'sub.json')))
   return res == -9
 end)
+
+-- Fn print
+testerFn('Fn print', function()
+  local res = interpreter:interpret(json.decode(readFile(pathBaseName .. 'print_function.json')))
+  return res == '<#closure>'
+end)

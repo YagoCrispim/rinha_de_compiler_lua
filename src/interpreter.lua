@@ -81,7 +81,7 @@ local Interpreter = class({
       local fnDecl = nil
       local pure = false
 
-      if node.type == 'fn' then
+      if node._type == 'fn' then
         fnDecl = node.value
         pure = node.pure
       else
