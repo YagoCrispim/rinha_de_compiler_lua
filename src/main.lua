@@ -14,5 +14,5 @@ end
 
 local interpreter = Interpreter:new()
 -- local fileName = '/var/rinha/source.rinha.json'
-local fileName = './asts/fib_print.json'
+local fileName = './asts/print_function.json'
 interpreter:interpret(json.decode(readFile(fileName)))
