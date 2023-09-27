@@ -42,8 +42,17 @@ local Interpreter = class({
     Print = function (self, ast)
       local value = self:interpret(ast.value)
 
-      if type(value) == "table" and value._type and value._type == "Tuple" then
-        local result = ('(' .. value.first .. ', ' .. value.second .. ')')
+      if type(value) == "table" and value._type then
+        local result = nil
+        
+        if value._type == "Tuple" then
+          result = ('(' .. value.first .. ', ' .. value.second .. ')')
+        end
+
+        if value._type == "fn" then
+          result = "<#closure>"
+        end
+
         print(result)
         return result
       end
@@ -172,7 +181,7 @@ local Interpreter = class({
       ]]
       local fnNodeStr = json.encode(ast)
       local result = {
-        type = 'fn',
+        _type = 'fn',
         pure = true,
         value = ast,
       }
