@@ -1,4 +1,5 @@
 local class = require "lib.class"
+local json = require 'lib.json'
 local SymbolTable = require "src.symtab"
 
 local memo = {}
@@ -11,11 +12,8 @@ local Op = {
     return valA - valB
   end,
   Add = function (valA, valB)
-    if type(valA) == 'string' and type(valB) ~= 'string' then
-      return valA .. tostring(valB)
-    end
-    if type(valA) ~= 'string' and type(valB) == 'string' then
-      return tostring(valA) .. valB
+    if type(valA) == "string" or type(valB) == "string" then
+      return tostring(valA) .. tostring(valB)
     end
     return valA + valB
   end,
@@ -63,27 +61,40 @@ local Interpreter = class({
         self._symtab:define(ast.name.text, value)
         return self:interpret(ast.next)
       end
-      
-      self._symtab:define(ast.name.text, ast.value)
+
+      local node = self:interpret(ast.value)
+      self._symtab:define(ast.name.text, node)
       return self:interpret(ast.next)
     end,
 
     Call = function (self, ast)
-      local fnDecl = self:interpret(ast.callee)
+      local node = self:interpret(ast.callee)
+      local fnDecl = nil
+      local pure = false
+
+      if node.type == 'fn' then
+        fnDecl = node.value
+        pure = node.pure
+      else
+        fnDecl = node
+      end
+
       local fnArgs = {}
 
       local memoizedFn = nil
       for i, v in pairs(ast.arguments) do
         local arg = self:interpret(v)
 
-        if #ast.arguments == 1 then
-          memoizedFn = ast.callee.text .. arg
+        if pure then
+          if #ast.arguments == 1 then
+            memoizedFn = ast.callee.text .. arg
+          end
         end
 
         fnArgs[fnDecl.parameters[i].text] = arg
       end
 
-      if memoizedFn and memo[memoizedFn] then
+      if pure and memoizedFn and memo[memoizedFn] then
         return memo[memoizedFn]
       end
 
@@ -93,7 +104,7 @@ local Interpreter = class({
       end
       local result = self:interpret(fnDecl.value)
 
-      if memoizedFn then
+      if pure and memoizedFn then
         memo[memoizedFn] = result
       end
 
@@ -151,6 +162,27 @@ local Interpreter = class({
     Second = function (self, ast)
       local tuple = self:interpret(ast.value)
       return tuple.second
+    end,
+
+    Function = function (self, ast)
+      --[[
+      TODO
+        Check if the fn is accessing a variable from the outer scope
+        Check if the fn is calling another fn that is not pure
+      ]]
+      local fnNodeStr = json.encode(ast)
+      local result = {
+        type = 'fn',
+        pure = true,
+        value = ast,
+      }
+      local isPure = string.find(fnNodeStr, '"kind":"Print"')
+      
+      if isPure then
+        result.pure = false
+      end
+
+      return result
     end,
   }
 })
