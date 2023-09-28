@@ -13,6 +13,6 @@ local function readFile(path)
 end
 
 local interpreter = Interpreter:new()
--- local fileName = '/var/rinha/source.rinha.json'
-local fileName = './asts/test.json'
+local fileName = '/var/rinha/source.rinha.json'
+-- local fileName = './asts/test.json'
 interpreter:interpret(json.decode(readFile(fileName)))
