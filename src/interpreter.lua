@@ -33,6 +33,7 @@ local Interpreter = class({
     end,
     methods = {
         interpret = function(self, ast)
+            if not ast then return nil end
             if ast.expression then
                 return self:interpret(ast.expression)
             end
@@ -96,7 +97,7 @@ local Interpreter = class({
             for i, v in pairs(ast.arguments) do
                 local arg = self:interpret(v)
 
-                if arg._type and arg._type ~= 'fn' and pure then
+                if arg and type(arg) == "table" and arg._type and arg._type ~= 'fn' and pure then
                     if #ast.arguments == 1 then
                         memoizedFn = tostring(ast.callee.text) .. tostring(arg)
                     end
@@ -150,19 +151,9 @@ local Interpreter = class({
         end,
 
         Binary = function(self, ast)
-            local opName = ast.op
-            local op = self._operations[opName]
+            local op = self._operations[ast.op]
             local valA = self:interpret(ast.lhs)
             local valB = self:interpret(ast.rhs)
-
-            if type(valA) == 'table' then
-                valA = self:interpret(valA)
-            end
-
-            if type(valB) == 'table' then
-                valB = self:interpret(valB)
-            end
-
             return op(valA, valB)
         end,
 
