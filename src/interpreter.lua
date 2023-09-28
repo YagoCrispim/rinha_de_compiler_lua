@@ -44,9 +44,9 @@ local Interpreter = class({
 
       if type(value) == "table" and value._type then
         local result = nil
-        
+ 
         if value._type == "Tuple" then
-          result = ('(' .. value.first .. ', ' .. value.second .. ')')
+          result = ('(' .. tostring(value.first) .. ', ' .. tostring(value.second) .. ')')
         end
 
         if value._type == "fn" then
@@ -80,10 +80,12 @@ local Interpreter = class({
       local node = self:interpret(ast.callee)
       local fnDecl = nil
       local pure = false
+      local scope = nil
 
       if node._type == 'fn' then
         fnDecl = node.value
         pure = node.pure
+        scope = node.scope
       else
         fnDecl = node
       end
@@ -107,7 +109,12 @@ local Interpreter = class({
         return memo[memoizedFn]
       end
 
-      self._symtab:pushScope()
+      if scope then
+        self._symtab.currentScope = scope
+      else
+        self._symtab:pushScope()
+      end
+
       for i, v in pairs(fnArgs) do
         self._symtab:define(i, v)
       end
@@ -115,6 +122,10 @@ local Interpreter = class({
 
       if pure and memoizedFn then
         memo[memoizedFn] = result
+      end
+
+      if type(result) == "table" and result._type == 'fn' then
+        result.scope = self._symtab.currentScope
       end
 
       self._symtab:popScope()
