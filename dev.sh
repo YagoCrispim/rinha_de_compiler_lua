@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # Hot reload simulator
-
-FILE="src/main.lua"
+FILE="src/main_cp.lua"
 AST=$1
 
 function clear_screen() {

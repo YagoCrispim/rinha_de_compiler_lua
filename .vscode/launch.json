@@ -8,7 +8,7 @@
       "type": "lua",
       "request": "launch",
       "name": "Debug",
-      "program": "${workspaceFolder}/src/main.lua"
+      "program": "${workspaceFolder}/src/main_cp.lua"
     }
   ]
 }

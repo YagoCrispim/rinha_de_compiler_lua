@@ -14,7 +14,7 @@ local Op = {
     Sub = function(valA, valB)
         return valA - valB
     end,
-    Mul = function (valA, valB)
+    Mul = function(valA, valB)
         return valA * valB
     end,
     Div = function(valA, valB)
@@ -127,10 +127,8 @@ local Interpreter = class({
             for i, v in pairs(ast.arguments) do
                 local arg = self:interpret(v)
 
-                if arg and type(arg) == "table" and arg._type and arg._type ~= 'fn' and pure then
-                    if #ast.arguments == 1 then
-                        memoizedFn = tostring(ast.callee.text) .. tostring(arg)
-                    end
+                if type(arg) ~= "table" and pure and #ast.arguments == 1 then
+                    memoizedFn = tostring(ast.callee.text) .. tostring(arg)
                 end
 
                 fnArgs[fnDecl.parameters[i].text] = arg
