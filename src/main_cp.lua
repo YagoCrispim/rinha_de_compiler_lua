@@ -13,5 +13,5 @@ local function readFile(path)
 end
 
 local interpreter = Interpreter:new()
-local fileName = 'asts/ast_for_test.json'
+local fileName = 'asts/test.json'
 interpreter:interpret(json.decode(readFile(fileName)))

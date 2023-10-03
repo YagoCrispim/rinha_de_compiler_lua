@@ -2,8 +2,6 @@ local class = require "lib.class"
 local json = require 'lib.json'
 local SymbolTable = require "src.symtab"
 
-local memo = {}
-
 local Op = {
     Add = function(valA, valB)
         if type(valA) == "string" or type(valB) == "string" then
@@ -110,12 +108,10 @@ local Interpreter = class({
         Call = function(self, ast)
             local node = self:interpret(ast.callee)
             local fnDecl = nil
-            local pure = false
             local scope = nil
 
             if node._type == 'fn' then
                 fnDecl = node.value
-                pure = node.pure
                 scope = node.scope
             else
                 fnDecl = node
@@ -123,19 +119,10 @@ local Interpreter = class({
 
             local fnArgs = {}
 
-            local memoizedFn = nil
             for i, v in pairs(ast.arguments) do
                 local arg = self:interpret(v)
 
-                if type(arg) ~= "table" and pure and #ast.arguments == 1 then
-                    memoizedFn = tostring(ast.callee.text) .. tostring(arg)
-                end
-
                 fnArgs[fnDecl.parameters[i].text] = arg
-            end
-
-            if pure and memoizedFn and memo[memoizedFn] then
-                return memo[memoizedFn]
             end
 
             if scope then
@@ -148,10 +135,6 @@ local Interpreter = class({
                 self._symtab:define(i, v)
             end
             local result = self:interpret(fnDecl.value)
-
-            if pure and memoizedFn then
-                memo[memoizedFn] = result
-            end
 
             if type(result) == "table" and result._type == 'fn' then
                 result.scope = self._symtab.currentScope
