@@ -1,62 +1,15 @@
 local class = require "lib.class"
-local json = require 'lib.json'
+local Op = require "src.operations"
 local SymbolTable = require "src.symtab"
 
-local Op = {
-    Add = function(valA, valB)
-        if type(valA) == "string" or type(valB) == "string" then
-            return tostring(valA) .. tostring(valB)
-        end
-        return valA + valB
-    end,
-    Sub = function(valA, valB)
-        return valA - valB
-    end,
-    Mul = function(valA, valB)
-        return valA * valB
-    end,
-    Div = function(valA, valB)
-        if valB == 0 then
-            return nil
-        end
-        if valA % valB == 0 then
-            return valA / valB
-        end
-        return math.floor(valA / valB)
-    end,
-    Rem = function(valA, valB)
-        return valA % valB
-    end,
-    Eq = function(valA, valB)
-        return valA == valB
-    end,
-    Neq = function(valA, valB)
-        return valA ~= valB
-    end,
-    Lt = function(valA, valB)
-        return valA < valB
-    end,
-    Gt = function(valA, valB)
-        return valA > valB
-    end,
-    Lte = function(valA, valB)
-        return valA <= valB
-    end,
-    Gte = function(valA, valB)
-        return valA >= valB
-    end,
-    And = function(valA, valB)
-        return valA and valB
-    end,
-    Or = function(valA, valB)
-        return valA or valB
-    end,
-}
+------- temp -------
+local typeFn = 'fn'
+local typeTuple = 'tuple'
+--------------------
 
 local Interpreter = class({
     constructor = function(self)
         self._symtab = SymbolTable:new()
-        self._allowLog = false
         self._operations = Op
     end,
     methods = {
@@ -70,23 +23,18 @@ local Interpreter = class({
 
         Print = function(self, ast)
             local value = self:interpret(ast.value)
+            local result = value
 
             if type(value) == "table" and value._type then
-                local result = nil
-
-                if value._type == "Tuple" then
+                if value._type == typeTuple then
                     result = ('(' .. tostring(value.first) .. ', ' .. tostring(value.second) .. ')')
                 end
 
-                if value._type == "fn" then
+                if value._type == typeFn then
                     result = "<#closure>"
                 end
-
-                print(result)
-                return result
             end
-            print(value)
-            return value
+            print(result)
         end,
 
         Str = function(_, ast)
@@ -94,7 +42,7 @@ local Interpreter = class({
         end,
 
         Let = function(self, ast)
-            if ast.value.kind ~= 'Function' then
+            if ast.value.kind ~= typeFn then
                 local value = self:interpret(ast.value)
                 self._symtab:define(ast.name.text, value)
                 return self:interpret(ast.next)
@@ -110,7 +58,7 @@ local Interpreter = class({
             local fnDecl = nil
             local scope = nil
 
-            if node._type == 'fn' then
+            if node._type == typeFn then
                 fnDecl = node.value
                 scope = node.scope
             else
@@ -121,7 +69,6 @@ local Interpreter = class({
 
             for i, v in pairs(ast.arguments) do
                 local arg = self:interpret(v)
-
                 fnArgs[fnDecl.parameters[i].text] = arg
             end
 
@@ -136,7 +83,7 @@ local Interpreter = class({
             end
             local result = self:interpret(fnDecl.value)
 
-            if type(result) == "table" and result._type == 'fn' then
+            if type(result) == "table" and result._type == typeFn then
                 result.scope = self._symtab.currentScope
             end
 
@@ -170,7 +117,7 @@ local Interpreter = class({
 
         Tuple = function(self, ast)
             return {
-                _type = "Tuple",
+                _type = typeTuple,
                 first = self:interpret(ast.first),
                 second = self:interpret(ast.second),
             }
@@ -190,25 +137,11 @@ local Interpreter = class({
             return tuple.second
         end,
 
-        Function = function(self, ast)
-            --[[
-      TODO
-        Check if the fn is accessing a variable from the outer scope
-        Check if the fn is calling another fn that is not pure
-      ]]
-            local fnNodeStr = json.encode(ast)
-            local result = {
-                _type = 'fn',
-                pure = true,
+        Function = function(_, ast)
+            return {
+                _type = typeFn,
                 value = ast,
             }
-            local isPure = string.find(fnNodeStr, '"kind":"Print"')
-
-            if isPure then
-                result.pure = false
-            end
-
-            return result
         end,
     }
 })

@@ -1,17 +1,18 @@
-local io = require 'io'
-local json = require 'lib.json'
 local Interpreter = require "src.interpreter"
+local readJson = require 'src.utils.file'.readJson
 
-local function readFile(path)
-  local file = io.open(path, 'r')
-  if file == nil then
-    return nil
-  end
-  local content = file:read('*a')
-  file:close()
-  return content
+local sourceFile = arg[1]
+
+if not sourceFile then
+  print('[ERROR]: No file specified')
+  os.exit(1)
+end
+
+if sourceFile == '--docker' then
+  sourceFile = '/var/rinha/source.rinha.json'
+else
+  sourceFile = 'asts/' .. sourceFile .. '.json'
 end
 
 local interpreter = Interpreter:new()
-local fileName = '/var/rinha/source.rinha.json'
-interpreter:interpret(json.decode(readFile(fileName)))
+interpreter:interpret(readJson(sourceFile))

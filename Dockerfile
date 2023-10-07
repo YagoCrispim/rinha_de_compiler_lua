@@ -4,4 +4,4 @@ WORKDIR /app
 
 COPY . /app
 
-CMD lua src/main.lua
+CMD lua src/main.lua --docker

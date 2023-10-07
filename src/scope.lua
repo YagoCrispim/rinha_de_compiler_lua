@@ -11,6 +11,7 @@ local Scope = class({
       if symbol then
         return symbol
       end
+
       if self.parentScope then
         return self.parentScope:lookup(name)
       end

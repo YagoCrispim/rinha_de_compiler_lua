@@ -1,6 +1,5 @@
 local io = require 'io'
 local json = require 'lib.json'
-local Interpreter = require "src.interpreter"
 
 local function readFile(path)
   local file = io.open(path, 'r')
@@ -12,6 +11,12 @@ local function readFile(path)
   return content
 end
 
-local interpreter = Interpreter:new()
-local fileName = 'asts/test.json'
-interpreter:interpret(json.decode(readFile(fileName)))
+local function readJson(path)
+  return json.decode(readFile(path))
+end
+
+return {
+  readFile = readFile,
+  readJson = readJson
+}
+
